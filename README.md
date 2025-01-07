@@ -25,7 +25,7 @@ EchoTask is a modern, voice-enabled task management system designed to streamlin
 
 ## 🚀 Demo
 
-[Live Demo](your_demo_link_here)
+[Live Demo](https://santhoshkumar-exe.github.io/EchoTask/)
 
 ![EchoTask Demo](path_to_demo_gif.gif)
 
