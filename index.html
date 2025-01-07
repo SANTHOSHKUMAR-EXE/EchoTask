@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoTask - Task Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0b0f;
+            --primary-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --text-primary: #fff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh);
+            background-image: 
+                linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Login Section */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            background: rgba(30, 30, 35, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 2px;
+            background: rgba(30, 30, 35, 0.3);
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary-purple);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(30, 30, 35, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-purple);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #7c3aed;
+        }
+
+        /* Main Content */
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .main-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .task-section {
+            background: rgba(30, 30, 35, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .task-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .task-item {
+            background: rgba(30, 30, 35, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .task-content {
+            color: var(--text-primary);
+        }
+
+        .task-date {
+            color: var(--text-secondary);
+        }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875em;
+            font-weight: 500;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .priority-medium {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        .priority-low {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary-purple);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .voice-btn.active {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px 0;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(30, 30, 35, 0.5);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: var(--primary-purple);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Add padding to container to prevent content from hiding behind footer */
+        .container {
+            padding-bottom: 80px;
+        }
+
+        /* Custom DateTime Picker Styles */
+        .datetime-picker {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .date-picker, .time-picker {
+            position: relative;
+            flex: 1;
+        }
+
+        .date-picker input, .time-picker input {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 40px;
+            background: rgba(30, 30, 35, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .picker-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-purple);
+            pointer-events: none;
+        }
+
+        /* Custom Calendar Styles */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            color: transparent;
+            cursor: pointer;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Custom Time Picker */
+        .time-selector {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(30, 30, 35, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(12px);
+        }
+
+        .time-selector.active {
+            display: block;
+        }
+
+        .time-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .time-preset {
+            padding: 8px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .time-preset:hover {
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .custom-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .custom-time input {
+            width: 60px;
+            padding: 6px;
+            background: rgba(30, 30, 35, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">EchoTask</h1>
+                <p class="login-subtitle">Task Management System</p>
+            </div>
+            <div class="tab-group">
+                <button class="tab active">Username</button>
+                <button class="tab">Password</button>
+            </div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" class="input-field" placeholder="Enter username" id="username">
+                </div>
+                <div class="input-group">
+                    <input type="password" class="input-field" placeholder="Enter password" id="password">
+                </div>
+                <button type="submit" class="btn">Login to System</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+        
+        <header class="header">
+            <h1 class="main-title">Task Manager</h1>
+            <p class="subtitle">Manage your tasks efficiently</p>
+        </header>
+
+        <section class="task-section">
+            <div class="task-controls">
+                <div class="input-group main-input">
+                    <input type="text" class="input-field" placeholder="Enter new task..." id="taskInput">
+                </div>
+                <div class="datetime-picker">
+                    <div class="date-picker">
+                        <input type="date" class="input-field" id="dateInput">
+                        <svg class="picker-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="time-picker">
+                        <input type="text" class="input-field" id="timeDisplay" readonly placeholder="Select duration">
+                        <svg class="picker-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <div class="time-selector" id="timeSelector">
+                            <div class="time-presets">
+                                <button class="time-preset">15min</button>
+                                <button class="time-preset">25min</button>
+                                <button class="time-preset">30min</button>
+                                <button class="time-preset">45min</button>
+                                <button class="time-preset">60min</button>
+                                <button class="time-preset">90min</button>
+                            </div>
+                            <div class="custom-time">
+                                <input type="number" id="timeInput" min="1" max="180" placeholder="Custom">
+                                <span>minutes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn voice-btn" id="voiceBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn add-btn" id="addBtn">Add Task</button>
+                </div>
+            </div>
+            <div class="task-grid" id="taskList">
+                <!-- Tasks will be added here -->
+            </div>
+        </section>
+
+        <!-- Add description panel -->
+        <section class="description-panel">
+            <h2>How to Use EchoTask</h2>
+            <ul>
+                <li><span class="highlight">Voice Input:</span> Click the microphone icon to add tasks using voice commands</li>
+                <li><span class="highlight">Date Selection:</span> Choose a due date for your tasks using the calendar</li>
+                <li><span class="highlight">Timer:</span> Set duration in minutes (1-180) for task tracking</li>
+                <li><span class="highlight">Priority Levels:</span> Tasks are automatically assigned priority (High, Medium, Low)</li>
+                <li><span class="highlight">Task Management:</span> Use Start/Stop to control task timers</li>
+                <li><span class="highlight">Data Persistence:</span> Your tasks are saved automatically</li>
+            </ul>
+        </section>
+
+        <!-- Add footer -->
+        <footer class="footer">
+            <p>© 2024 EchoTask | Developed by <a href="https://www.linkedin.com/in/connectwithsanthosh/" target="_blank">Santhosh Kumar</a></p>
+        </footer>
+    </div>
+
+    <!-- Keep your existing JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const loginOverlay = document.getElementById('loginOverlay');
+            const loginForm = document.getElementById('loginForm');
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const taskInput = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            const voiceBtn = document.getElementById('voiceBtn');
+            const dateInput = document.getElementById('dateInput');
+            const timeInput = document.getElementById('timeInput');
+            const addBtn = document.getElementById('addBtn');
+
+            // Check if already logged in
+            if (sessionStorage.getItem('authenticated')) {
+                loginOverlay.style.opacity = '0';
+                loginOverlay.style.display = 'none';
+                loadTasks();
+            }
+
+            // Login Handler
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                if (username.value === '1947' && password.value === '1947') {
+                    // Fade out login overlay
+                    loginOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loginOverlay.style.display = 'none';
+                    }, 500);
+                    
+                    // Set authentication
+                    sessionStorage.setItem('authenticated', 'true');
+                    
+                    // Load tasks
+                    loadTasks();
+                } else {
+                    // Show error (you can add an error message element)
+                    alert('Invalid credentials');
+                    username.value = '';
+                    password.value = '';
+                }
+            });
+
+            // Logout Handler
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('authenticated');
+                saveTasks();
+                loginOverlay.style.display = 'flex';
+                loginOverlay.style.opacity = '1';
+                username.value = '';
+                password.value = '';
+            });
+
+            // Add Task Handler
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && taskInput.value.trim() !== '') {
+                    addTask(taskInput.value);
+                    taskInput.value = '';
+                }
+            });
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.value = today;
+
+            // Voice Recognition Setup
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                let isListening = false;
+
+                voiceBtn.addEventListener('click', () => {
+                    if (!isListening) {
+                        isListening = true;
+                        recognition.start();
+                        voiceBtn.classList.add('active');
+                    }
+                });
+
+                recognition.onresult = (event) => {
+                    const text = event.results[0][0].transcript;
+                    taskInput.value = text;
+                    voiceBtn.classList.remove('active');
+                    isListening = false;
+                };
+
+                recognition.onend = () => {
+                    voiceBtn.classList.remove('active');
+                    isListening = false;
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    voiceBtn.classList.remove('active');
+                    isListening = false;
+                    if (event.error === 'not-allowed') {
+                        alert('Please allow microphone access to use voice input.');
+                    } else if (event.error !== 'aborted') {
+                        alert('Voice input failed. Please try again or type manually.');
+                    }
+                };
+            } else {
+                voiceBtn.style.display = 'none';
+            }
+
+            // Add Task Button Handler
+            addBtn.addEventListener('click', () => {
+                if (taskInput.value.trim() !== '') {
+                    addTask(taskInput.value);
+                    taskInput.value = '';
+                    timeInput.value = '';
+                }
+            });
+
+            function addTask(text) {
+                const task = document.createElement('div');
+                task.className = 'task-item';
+                
+                const priority = ['high', 'medium', 'low'][Math.floor(Math.random() * 3)];
+                const duration = timeInput.value || 25; // Default 25 minutes
+                const taskDate = dateInput.value;
+                
+                task.innerHTML = `
+                    <div class="task-content">${text}</div>
+                    <div class="task-date">${new Date(taskDate).toLocaleDateString()}</div>
+                    <div class="timer">${duration}:00</div>
+                    <div class="priority-badge priority-${priority}">${priority}</div>
+                    <button class="action-btn start-btn">Start</button>
+                `;
+
+                const startBtn = task.querySelector('.start-btn');
+                const timerElement = task.querySelector('.timer');
+                let timerInterval;
+
+                startBtn.addEventListener('click', () => {
+                    if (startBtn.textContent === 'Start') {
+                        const totalSeconds = duration * 60;
+                        let timeLeft = totalSeconds;
+                        
+                        timerInterval = setInterval(() => {
+                            const minutes = Math.floor(timeLeft / 60);
+                            const seconds = timeLeft % 60;
+                            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                            if (--timeLeft < 0) {
+                                clearInterval(timerInterval);
+                                timerElement.textContent = 'DONE';
+                                startBtn.textContent = 'Start';
+                                startBtn.classList.remove('active');
+                                
+                                // Play alert sound
+                                const audio = new Audio('https://files.catbox.moe/vpc2jv.wav');
+                                audio.play().catch(error => {
+                                    console.error('Audio playback failed:', error);
+                                });
+
+                                // Show notification
+                                if ('Notification' in window && Notification.permission === 'granted') {
+                                    new Notification('Task Complete!', {
+                                        body: `Task "${text}" has been completed!`,
+                                        icon: '/favicon.ico'
+                                    });
+                                }
+                            }
+                        }, 1000);
+
+                        startBtn.textContent = 'Stop';
+                        startBtn.classList.add('active');
+                    } else {
+                        clearInterval(timerInterval);
+                        startBtn.textContent = 'Start';
+                        startBtn.classList.remove('active');
+                        timerElement.textContent = `${duration}:00`;
+                    }
+                });
+                
+                taskList.appendChild(task);
+                saveTasks();
+            }
+
+            // Save and Load Tasks
+            function saveTasks() {
+                localStorage.setItem('tasks', taskList.innerHTML);
+            }
+
+            function loadTasks() {
+                const savedTasks = localStorage.getItem('tasks');
+                if (savedTasks) {
+                    taskList.innerHTML = savedTasks;
+                    
+                    // Reattach event listeners to start buttons
+                    taskList.querySelectorAll('.start-btn').forEach(btn => {
+                        const task = btn.closest('.task-item');
+                        const timerElement = task.querySelector('.timer');
+                        const taskText = task.querySelector('.task-content').textContent;
+                        let timerInterval;
+
+                        btn.addEventListener('click', () => {
+                            if (btn.textContent === 'Start') {
+                                const timeString = timerElement.textContent;
+                                const duration = parseInt(timeString);
+                                const totalSeconds = duration * 60;
+                                let timeLeft = totalSeconds;
+
+                                timerInterval = setInterval(() => {
+                                    const minutes = Math.floor(timeLeft / 60);
+                                    const seconds = timeLeft % 60;
+                                    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                                    if (--timeLeft < 0) {
+                                        clearInterval(timerInterval);
+                                        timerElement.textContent = 'DONE';
+                                        btn.textContent = 'Start';
+                                        btn.classList.remove('active');
+                                        
+                                        const audio = new Audio('https://files.catbox.moe/vpc2jv.wav');
+                                        audio.play().catch(error => {
+                                            console.error('Audio playback failed:', error);
+                                        });
+
+                                        if ('Notification' in window && Notification.permission === 'granted') {
+                                            new Notification('Task Complete!', {
+                                                body: `Task "${taskText}" has been completed!`,
+                                                icon: '/favicon.ico'
+                                            });
+                                        }
+                                    }
+                                }, 1000);
+
+                                btn.textContent = 'Stop';
+                                btn.classList.add('active');
+                            } else {
+                                clearInterval(timerInterval);
+                                btn.textContent = 'Start';
+                                btn.classList.remove('active');
+                                const duration = parseInt(timerElement.textContent);
+                                timerElement.textContent = `${duration}:00`;
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Request notification permission
+            if ('Notification' in window) {
+                Notification.requestPermission();
+            }
+
+            // Time picker functionality
+            const timeDisplay = document.getElementById('timeDisplay');
+            const timeSelector = document.getElementById('timeSelector');
+            const timePresets = document.querySelectorAll('.time-preset');
+
+            timeDisplay.addEventListener('click', () => {
+                timeSelector.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!timeSelector.contains(e.target) && e.target !== timeDisplay) {
+                    timeSelector.classList.remove('active');
+                }
+            });
+
+            timePresets.forEach(preset => {
+                preset.addEventListener('click', () => {
+                    const minutes = parseInt(preset.textContent);
+                    timeInput.value = minutes;
+                    timeDisplay.value = `${minutes} minutes`;
+                    timeSelector.classList.remove('active');
+                });
+            });
+
+            timeInput.addEventListener('change', () => {
+                const minutes = timeInput.value;
+                if (minutes >= 1 && minutes <= 180) {
+                    timeDisplay.value = `${minutes} minutes`;
+                    timeSelector.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
